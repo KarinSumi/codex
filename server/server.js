@@ -15,8 +15,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-let conversationHistory = "";
-
 app.get('/', async (req, res) => {
   res.status(200).send({
     message: 'Hello from CodeX!'
@@ -25,7 +23,7 @@ app.get('/', async (req, res) => {
 
 app.post('/', async (req, res) => {
   try {
-    const prompt = '${conversationHistory} ${req.body.prompt}';
+    const prompt = req.body.prompt;
 
     const response = await openai.createCompletion({
       model: "text-davinci-003",
