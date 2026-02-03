@@ -161,7 +161,7 @@ void OnTick()
 //+------------------------------------------------------------------+
 void CheckAssetSignals(AssetConfig &asset)
 {
-   datetime currentBarTime = iTime(asset.symbol, asset.lowerTF, 0);
+   datetime currentBarTime = iTime(asset.symbol, asset.lowerTF, 1);
    if(currentBarTime == asset.lastCheckTime) return;
    asset.lastCheckTime = currentBarTime;
 
@@ -170,24 +170,24 @@ void CheckAssetSignals(AssetConfig &asset)
 
    double stHigher[], stLower[];
    int dirHigher[], dirLower[];
-   CalculateSuperTrend(asset.symbol, asset.higherTF, asset.atrPeriod, asset.stMultiplier, 10, stHigher, dirHigher);
-   CalculateSuperTrend(asset.symbol, asset.lowerTF, asset.atrPeriod, asset.stMultiplier, 10, stLower, dirLower);
+   CalculateSuperTrend(asset.symbol, asset.higherTF, asset.atrPeriod, asset.stMultiplier, 20, stHigher, dirHigher);
+   CalculateSuperTrend(asset.symbol, asset.lowerTF, asset.atrPeriod, asset.stMultiplier, 20, stLower, dirLower);
 
-   if(ArraySize(dirHigher) < 2 || ArraySize(dirLower) < 2) return;
+   if(ArraySize(dirHigher) < 3 || ArraySize(dirLower) < 3) return;
 
-   datetime higherTFBarTime = iTime(asset.symbol, asset.higherTF, 0);
+   datetime higherTFBarTime = iTime(asset.symbol, asset.higherTF, 1);
    if(higherTFBarTime != asset.lastHigherTFCheck)
    {
       asset.lastHigherTFCheck = higherTFBarTime;
-      bool higherFlipBullish = (dirHigher[0] == 1 && asset.lastHigherTFDir == -1);
-      bool higherFlipBearish = (dirHigher[0] == -1 && asset.lastHigherTFDir == 1);
+      bool higherFlipBullish = (dirHigher[1] == 1 && asset.lastHigherTFDir == -1);
+      bool higherFlipBearish = (dirHigher[1] == -1 && asset.lastHigherTFDir == 1);
       if(higherFlipBullish) { asset.flagDirection = 1; Print("🚩 ", asset.symbol, " | H-TF BULLISH FLAG SET"); }
       if(higherFlipBearish) { asset.flagDirection = -1; Print("🚩 ", asset.symbol, " | H-TF BEARISH FLAG SET"); }
-      asset.lastHigherTFDir = dirHigher[0];
+      asset.lastHigherTFDir = dirHigher[1];
    }
 
-   bool pullbackBuy = InpUsePullbackSignal && asset.flagDirection == 1 && dirLower[0] == 1 && dirLower[1] == -1;
-   bool pullbackSell = InpUsePullbackSignal && asset.flagDirection == -1 && dirLower[0] == -1 && dirLower[1] == 1;
+   bool pullbackBuy = InpUsePullbackSignal && asset.flagDirection == 1 && dirLower[1] == 1 && dirLower[2] == -1;
+   bool pullbackSell = InpUsePullbackSignal && asset.flagDirection == -1 && dirLower[1] == -1 && dirLower[2] == 1;
 
    if(pullbackBuy || pullbackSell)
    {
